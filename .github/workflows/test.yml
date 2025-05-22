@@ -2,9 +2,9 @@ name: Test, Build and Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   test:
@@ -31,8 +31,8 @@ jobs:
   build-and-push:
     needs: test
     runs-on: ubuntu-latest
-    # Only run this job when pushing to main, not on pull requests
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Only run this job when pushing to master, not on pull requests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
     - uses: actions/checkout@v2
     
