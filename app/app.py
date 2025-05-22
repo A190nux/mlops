@@ -1,26 +1,30 @@
 import streamlit as st
 import requests as rs
+import json
 
-CreditScore = st.text_input("Credit Score")
-Geography = st.text_input("Geography")
-Gender = st.text_input("Gender")
-Age = st.text_input("Age")
-Tenure = st.text_input("Tenure")
-Balance = st.text_input("Balance")
-NumOfProducts = st.text_input("Num Of Products")
-HasCrCard = st.text_input("HasCrCard")
-IsActiveMember = st.text_input("IsActiveMember")
-EstimatedSalary = st.text_input("Estimated Salary")
+st.title("Bank Customer Churn Prediction")
 
-
-def get_api(params):
-    url = f"http://api:8086/predict/"
-    response = rs.get(url, params=params)
-    return response.content
+CreditScore = st.number_input("Credit Score", min_value=300, max_value=900, value=650)
+Geography = st.selectbox("Geography", ["France", "Germany", "Spain"])
+Gender = st.selectbox("Gender", ["Male", "Female"])
+Age = st.number_input("Age", min_value=18, max_value=100, value=35)
+Tenure = st.number_input("Tenure", min_value=0, max_value=10, value=5)
+Balance = st.number_input("Balance", min_value=0.0, value=75000.0)
+NumOfProducts = st.number_input("Num Of Products", min_value=1, max_value=4, value=2)
+HasCrCard = st.radio("Has Credit Card", [1, 0], format_func=lambda x: "Yes" if x == 1 else "No")
+IsActiveMember = st.radio("Is Active Member", [1, 0], format_func=lambda x: "Yes" if x == 1 else "No")
+EstimatedSalary = st.number_input("Estimated Salary", min_value=0.0, value=50000.0)
 
 
-if st.button("Get response"):
-    params = {
+def get_prediction(data):
+    url = "http://api:8086/predict"
+    headers = {"Content-Type": "application/json"}
+    response = rs.post(url, data=json.dumps(data), headers=headers)
+    return response.json()
+
+
+if st.button("Predict Churn"):
+    data = {
         "CreditScore": int(CreditScore),
         "Geography": str(Geography),
         "Gender": str(Gender),
@@ -33,6 +37,7 @@ if st.button("Get response"):
         "EstimatedSalary": float(EstimatedSalary)
     }
 
-    data = get_api(params)
-    st.write(data)
-
+    with st.spinner('Predicting...'):
+        result = get_prediction(data)
+    
+    st.write(result)

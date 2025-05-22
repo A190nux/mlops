@@ -1,13 +1,19 @@
 from fastapi import FastAPI, Query, HTTPException
 from prometheus_fastapi_instrumentator import Instrumentator
-from mlflow import MlflowClient
+from prometheus_client import Counter, Histogram
 import mlflow.pyfunc
 import pandas as pd
 from typing import Union, Optional
+import time
 
 import joblib
 import logging
 from pydantic import BaseModel, Field
+
+# Add these new metrics
+PREDICTION_COUNTER = Counter('model_predictions_total', 'Total number of predictions', ['result'])
+PREDICTION_LATENCY = Histogram('model_prediction_seconds', 'Time spent processing prediction', 
+                              buckets=[0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0])
 
 logging.basicConfig(
     level=logging.INFO,
@@ -81,6 +87,9 @@ async def predict(data: CustomerData):
     try:
         logger.info("Received prediction request")
         
+        # Start timing the prediction
+        start_time = time.time()
+        
         # Convert input data to DataFrame
         input_df = pd.DataFrame([data.dict()])
         logger.debug(f"Input data: {input_df}")
@@ -105,6 +114,11 @@ async def predict(data: CustomerData):
                 logger.debug(f"Prediction probability: {probability}")
         except Exception as e:
             logger.warning(f"Could not get probability: {str(e)}")
+        
+        # Record metrics
+        prediction_time = time.time() - start_time
+        PREDICTION_LATENCY.observe(prediction_time)
+        PREDICTION_COUNTER.labels(result=prediction_label).inc()
         
         return {
             "prediction": prediction,
