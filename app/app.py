@@ -1,10 +1,16 @@
 import streamlit as st
 import requests as rs
 
-sepal_length = st.text_input("Sepal Length")
-sepal_width = st.text_input("Sepal Width")
-petal_length = st.text_input("Petal Length")
-petal_width = st.text_input("Petal Width ")
+CreditScore = st.text_input("Credit Score")
+Geography = st.text_input("Geography")
+Gender = st.text_input("Gender")
+Age = st.text_input("Age")
+Tenure = st.text_input("Tenure")
+Balance = st.text_input("Balance")
+NumOfProducts = st.text_input("Num Of Products")
+HasCrCard = st.text_input("HasCrCard")
+IsActiveMember = st.text_input("IsActiveMember")
+EstimatedSalary = st.text_input("Estimated Salary")
 
 
 def get_api(params):
@@ -15,10 +21,16 @@ def get_api(params):
 
 if st.button("Get response"):
     params = {
-        "sepal_length": float(sepal_length),
-        "sepal_width": float(sepal_width),
-        "petal_length": float(petal_length),
-        "petal_width": float(petal_width)
+        "CreditScore": int(CreditScore),
+        "Geography": str(Geography),
+        "Gender": str(Gender),
+        "Age": int(Age),
+        "Tenure": int(Tenure),
+        "Balance": float(Balance),
+        "NumOfProducts": int(NumOfProducts),
+        "HasCrCard": int(HasCrCard),
+        "IsActiveMember": int(IsActiveMember),
+        "EstimatedSalary": float(EstimatedSalary)
     }
 
     data = get_api(params)
